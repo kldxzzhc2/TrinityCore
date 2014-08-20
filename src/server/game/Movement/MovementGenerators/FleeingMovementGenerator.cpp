@@ -36,11 +36,11 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T* owner)
     if (!owner)
         return;
 
-	owner->AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+    owner->AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
 
-	// zhang hong chao
-	if (owner->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
-		return;
+    // zhang hong chao
+    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
+	return;
 
     float x, y, z;
     _getPoint(owner, x, y, z);
@@ -156,32 +156,32 @@ bool FleeingMovementGenerator<T>::DoUpdate(T* owner, uint32 time_diff)
     if (!owner || !owner->IsAlive())
         return false;
 
-	//zhang hong chao
-	if (owner->HasUnitState(UNIT_STATE_ROOT))
-	{
-		if (owner->ToCreature()->HasReactState(REACT_PASSIVE)) {
-			owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-			owner->ClearUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
-			owner->ToCreature()->SetReactState(REACT_AGGRESSIVE);
-			if (Unit* victim = owner->GetVictim())
-			{
-				if (owner->IsAlive())
-				{
-					owner->AttackStop();
-					owner->ToCreature()->AI()->AttackStart(victim);
-				}
-			}
-		}
-		return true;
-	}
-	if (owner->ToCreature()->HasReactState(REACT_AGGRESSIVE)) {
-		owner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-		owner->AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
-		owner->AttackStop();
-		owner->CastStop();
-		owner->ToCreature()->SetReactState(REACT_PASSIVE);
-		i_nextCheckTime.Reset(100);
-	}
+    //zhang hong chao
+    if (owner->HasUnitState(UNIT_STATE_ROOT))
+    {
+	if (owner->ToCreature()->HasReactState(REACT_PASSIVE)) {
+	    owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+	    owner->ClearUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+	    owner->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+	    if (Unit* victim = owner->GetVictim())
+	    {
+		if (owner->IsAlive())
+	        {
+		    owner->AttackStop();
+		    owner->ToCreature()->AI()->AttackStart(victim);
+	        }
+	    }
+        }
+	return true;
+    }
+    if (owner->ToCreature()->HasReactState(REACT_AGGRESSIVE)) {
+	owner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+	owner->AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+	owner->AttackStop();
+	owner->CastStop();
+	owner->ToCreature()->SetReactState(REACT_PASSIVE);
+	i_nextCheckTime.Reset(100);
+    }
 
     i_nextCheckTime.Update(time_diff);
     if (i_nextCheckTime.Passed() && owner->movespline->Finalized())
