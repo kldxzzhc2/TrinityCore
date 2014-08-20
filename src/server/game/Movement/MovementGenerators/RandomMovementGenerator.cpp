@@ -35,9 +35,9 @@
 template<>
 void RandomMovementGenerator<Creature>::_setRandomLocation(Creature* creature)
 {
-	// zhang hong chao
-	if (creature->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
-		return;
+    // zhang hong chao
+    if (creature->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
+	return;
 
     float respX, respY, respZ, respO, destX, destY, destZ, travelDistZ;
     creature->GetHomePosition(respX, respY, respZ, respO);
@@ -146,14 +146,14 @@ void RandomMovementGenerator<Creature>::DoFinalize(Creature* creature)
 template<>
 bool RandomMovementGenerator<Creature>::DoUpdate(Creature* creature, const uint32 diff)
 {
-	// zhang hong chao
-	if (creature->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
+    // zhang hong chao
+    if (creature->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
     {
         i_nextMoveTime.Reset(diff * 2);  // Expire the timer
-		if (!creature->IsStopped()) {
-			creature->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
-			creature->StopMoving();
-		}
+	if (!creature->IsStopped()) {
+	    creature->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
+	    creature->StopMoving();
+	}
         return true;
     }
 
@@ -161,7 +161,7 @@ bool RandomMovementGenerator<Creature>::DoUpdate(Creature* creature, const uint3
     {
         i_nextMoveTime.Update(diff);
         if (i_nextMoveTime.Passed())
-            _setRandomLocation(creature);
+        _setRandomLocation(creature);
     }
     return true;
 }
