@@ -30,8 +30,8 @@
 template<class T>
 void PointMovementGenerator<T>::DoInitialize(T* unit)
 {
-    if (!unit->IsStopped())
-        unit->StopMoving();
+	if (!unit->IsStopped())
+		unit->StopMoving();
 
     unit->AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
 
@@ -42,7 +42,7 @@ void PointMovementGenerator<T>::DoInitialize(T* unit)
     init.MoveTo(i_x, i_y, i_z, m_generatePath);
     if (speed > 0.0f)
         init.SetVelocity(speed);
-    init.Launch();
+	init.Launch();
 
     // Call for creature group update
     if (Creature* creature = unit->ToCreature())
@@ -56,15 +56,9 @@ bool PointMovementGenerator<T>::DoUpdate(T* unit, uint32 /*diff*/)
     if (!unit)
         return false;
 
-    if (unit->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
-    {
-        unit->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
-        return true;
-    }
-
     unit->AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
-    if (id != EVENT_CHARGE_PREPATH && i_recalculateSpeed && !unit->movespline->Finalized())
+    if (id != EVENT_CHARGE_PREPATH  && i_recalculateSpeed && !unit->movespline->Finalized())
     {
         i_recalculateSpeed = false;
         Movement::MoveSplineInit init(unit);
@@ -121,10 +115,56 @@ template bool PointMovementGenerator<Creature>::DoUpdate(Creature*, uint32);
 
 void AssistanceMovementGenerator::Finalize(Unit* unit)
 {
-    unit->ToCreature()->SetNoCallAssistance(false);
-    unit->ToCreature()->CallAssistance();
-    if (unit->IsAlive())
-        unit->GetMotionMaster()->MoveSeekAssistanceDistract(sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY));
+	unit->ToCreature()->SetNoCallAssistance(false);
+	unit->ToCreature()->CallAssistance();
+	if (unit->IsAlive())
+		unit->GetMotionMaster()->MoveSeekAssistanceDistract(sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY));
+}
+// zhang hong chao
+bool AssistanceMovementGenerator::Update(Unit* unit, uint32 diff)
+{
+	if (!unit)
+		return false;
+	// zhang hong chao
+	if (unit->HasUnitState(UNIT_STATE_ROOT))
+	{
+		if (unit->ToCreature()->HasReactState(REACT_PASSIVE)) {
+			unit->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+		}
+		return true;
+	}
+	if (unit->ToCreature()->HasReactState(REACT_AGGRESSIVE)) {
+		unit->AttackStop();
+		unit->CastStop();
+		unit->ToCreature()->SetReactState(REACT_PASSIVE);
+	}
+	
+	Movement::MoveSplineInit init(unit);
+	init.MoveTo(i_x, i_y, i_z, m_generatePath);
+	init.Launch();
+
+	Position p(i_x, i_y, i_z);
+	if (unit->IsWithinDist3d(&p, 2.0f)) {
+		unit->StopMoving();
+		return false;
+	} else {
+		return true;
+	}
+}
+// zhang hong chao
+void AssistanceMovementGenerator::Initialize(Unit* unit)
+{
+	unit->AddUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
+
+	if (unit->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
+		return;
+
+	if (id == EVENT_CHARGE_PREPATH)
+		return;
+
+	Movement::MoveSplineInit init(unit);
+	init.MoveTo(i_x, i_y, i_z, m_generatePath);
+	init.Launch();
 }
 
 bool EffectMovementGenerator::Update(Unit* unit, uint32)
@@ -136,7 +176,6 @@ void EffectMovementGenerator::Finalize(Unit* unit)
 {
     if (unit->GetTypeId() != TYPEID_UNIT)
         return;
-
     // Need restore previous movement since we have no proper states system
     if (unit->IsAlive() && !unit->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_FLEEING))
     {
