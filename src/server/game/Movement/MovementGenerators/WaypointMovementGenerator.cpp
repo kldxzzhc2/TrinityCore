@@ -34,10 +34,6 @@
 
 void WaypointMovementGenerator<Creature>::LoadPath(Creature* creature)
 {
-    // zhang hong chao
-    if (creature->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
-	return;
-
     if (!path_id)
         path_id = creature->GetWaypointPath();
 
@@ -105,6 +101,10 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
 
     if (Stopped())
         return true;
+        
+    // zhang hong chao
+    if (creature->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
+	return;
 
     bool transportPath = creature->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && creature->GetTransGUID();
 
