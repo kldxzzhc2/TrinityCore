@@ -81,13 +81,13 @@ void MotionMaster::UpdateMotion(uint32 diff)
 {
     if (!_owner)
         return;
-	// zhang hong chao add flee condition
-	if (_owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED) && 
-		GetCurrentMovementGeneratorType() != ASSISTANCE_MOTION_TYPE &&
-		GetCurrentMovementGeneratorType() != TIMED_FLEEING_MOTION_TYPE &&
-		GetCurrentMovementGeneratorType() != FLEEING_MOTION_TYPE) {  // what about UNIT_STATE_DISTRACTED? Why is this not included?
-		return;
-	}
+    // zhang hong chao add flee condition
+    if (_owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED) && 
+	GetCurrentMovementGeneratorType() != ASSISTANCE_MOTION_TYPE &&
+	GetCurrentMovementGeneratorType() != TIMED_FLEEING_MOTION_TYPE &&
+	GetCurrentMovementGeneratorType() != FLEEING_MOTION_TYPE) {  // what about UNIT_STATE_DISTRACTED? Why is this not included?
+	    return;
+    }
 
     ASSERT(!empty());
 
@@ -245,10 +245,11 @@ void MotionMaster::MoveConfused()
 
 void MotionMaster::MoveChase(Unit* target, float dist, float angle)
 {
-	if (GetCurrentMovementGeneratorType() == ASSISTANCE_MOTION_TYPE ||
-		GetCurrentMovementGeneratorType() == FLEEING_MOTION_TYPE ||
-		GetCurrentMovementGeneratorType() == TIMED_FLEEING_MOTION_TYPE)
-		return;
+    // zhang hong chao
+    if (GetCurrentMovementGeneratorType() == ASSISTANCE_MOTION_TYPE ||
+	GetCurrentMovementGeneratorType() == FLEEING_MOTION_TYPE ||
+	GetCurrentMovementGeneratorType() == TIMED_FLEEING_MOTION_TYPE)
+	return;
 
     // ignore movement request if target not exist
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
@@ -465,11 +466,11 @@ void MotionMaster::MoveSeekAssistance(float x, float y, float z)
     {
         TC_LOG_DEBUG("misc", "Creature (Entry: %u GUID: %u) seek assistance (X: %f Y: %f Z: %f)",
             _owner->GetEntry(), _owner->GetGUIDLow(), x, y, z);
-		// zhang hong chao
+	// zhang hong chao
         _owner->AttackStop();
-		_owner->CastStop();
-		_owner->ToCreature()->SetReactState(REACT_PASSIVE);
-		// SendAutoRepeatCancel ?
+	_owner->CastStop();
+	_owner->ToCreature()->SetReactState(REACT_PASSIVE);
+	// SendAutoRepeatCancel ?
         Mutate(new AssistanceMovementGenerator(x, y, z), MOTION_SLOT_ACTIVE);
     }
 }
