@@ -34,6 +34,10 @@
 
 void WaypointMovementGenerator<Creature>::LoadPath(Creature* creature)
 {
+	// zhang hong chao
+	if (creature->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
+		return;
+
     if (!path_id)
         path_id = creature->GetWaypointPath();
 
@@ -180,6 +184,7 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
     init.Launch();
 
     //Call for creature group update
+
     if (creature->GetFormation() && creature->GetFormation()->getLeader() == creature)
     {
         creature->SetWalk(node->move_type != WAYPOINT_MOVE_TYPE_RUN);
@@ -193,11 +198,17 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
 {
     // Waypoint movement can be switched on/off
     // This is quite handy for escort quests and other stuff
-    if (creature->HasUnitState(UNIT_STATE_NOT_MOVE))
+	// zhang hong chao
+	if (creature->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
     {
-        creature->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
+		Stop(diff * 3);
+		if (!creature->IsStopped()) {
+			creature->ClearUnitState(UNIT_STATE_ROAMING_MOVE);
+			creature->StopMoving();    
+		}
         return true;
     }
+
     // prevent a crash at empty waypoint path.
     if (!i_path || i_path->empty())
         return false;
@@ -221,7 +232,7 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
             return StartMove(creature);
         }
     }
-     return true;
+    return true;
  }
 
 void WaypointMovementGenerator<Creature>::MovementInform(Creature* creature)
