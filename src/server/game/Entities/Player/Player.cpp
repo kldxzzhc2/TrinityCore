@@ -2792,6 +2792,15 @@ void Player::SetInWater(bool apply)
     /// @todo exist also swimming mobs, and function must be symmetric to enter/leave water
     m_isInWater = apply;
 
+	// add by zhanghongchao
+	if (apply) {
+		if(IsMounted()) {
+			Dismount();
+			RemoveAurasByType(SPELL_AURA_MOUNTED);
+			RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
+		}
+	}
+
     // remove auras that need water/land
     RemoveAurasWithInterruptFlags(apply ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
 
@@ -15220,7 +15229,7 @@ void Player::CompleteQuest(uint32 quest_id)
         SetQuestStatus(quest_id, QUEST_STATUS_COMPLETE);
 
         uint16 log_slot = FindQuestSlot(quest_id);
-        if (log_slot < MAX_QUEST_LOG_SIZE)
+		if (log_slot < MAX_QUEST_LOG_SIZE) 
             SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
 
         if (Quest const* qInfo = sObjectMgr->GetQuestTemplate(quest_id))
@@ -16301,19 +16310,25 @@ void Player::AreaExploredOrEventHappens(uint32 questId)
 {
     if (questId)
     {
+		
         uint16 log_slot = FindQuestSlot(questId);
         if (log_slot < MAX_QUEST_LOG_SIZE)
         {
             QuestStatusData& q_status = m_QuestStatus[questId];
-
             if (!q_status.Explored)
             {
                 q_status.Explored = true;
                 m_QuestStatusSave[questId] = QUEST_DEFAULT_SAVE_TYPE;
             }
         }
-        if (CanCompleteQuest(questId))
-            CompleteQuest(questId);
+
+		if (CanCompleteQuest(questId)) {
+			CompleteQuest(questId);
+		} else {
+			//add by zhang hong chao, thanks untaught's help
+			SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
+			SendQuestComplete(questId);
+		}
     }
 }
 
