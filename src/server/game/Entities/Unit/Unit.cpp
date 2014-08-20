@@ -69,7 +69,7 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     2.5f,                  // MOVE_WALK
     7.0f,                  // MOVE_RUN
     4.5f,                  // MOVE_RUN_BACK
-    4.722222f,             // MOVE_SWIM
+    3.0f,      			   // MOVE_SWIM  zhang hong chao old value is 4.722222f,
     2.5f,                  // MOVE_SWIM_BACK
     3.141594f,             // MOVE_TURN_RATE
     7.0f,                  // MOVE_FLIGHT
@@ -842,7 +842,7 @@ void Unit::CastSpell(SpellCastTargets const& targets, SpellInfo const* spellInfo
     /// @todo this is a workaround - not needed anymore, but required for some scripts :(
     if (!originalCaster && triggeredByAura)
         originalCaster = triggeredByAura->GetCasterGUID();
-
+	
     Spell* spell = new Spell(this, spellInfo, triggerFlags, originalCaster);
 
     if (value)
@@ -15509,13 +15509,15 @@ void Unit::SetControlled(bool apply, UnitState state)
                 }
                 break;
             case UNIT_STATE_FLEEING:
-                if (!HasUnitState(UNIT_STATE_STUNNED | UNIT_STATE_CONFUSED))
+				// zhang hong chao remove UNIT_STATE_STUNNED  check
+                if (!HasUnitState(UNIT_STATE_CONFUSED))
                 {
                     ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
                     SendMeleeAttackStop();
-                    // SendAutoRepeatCancel ?
-                    SetFeared(true);
-                    CastStop();
+					CastStop();
+					if (ToCreature())
+						ToCreature()->SetReactState(REACT_PASSIVE);
+					SetFeared(true);
                 }
                 break;
             default:
@@ -15622,7 +15624,7 @@ void Unit::SetStunned(bool apply)
 void Unit::SetRooted(bool apply)
 {
     if (apply)
-    {
+    {   
         if (m_rootTimes > 0) // blizzard internal check?
             m_rootTimes++;
 
@@ -16017,7 +16019,7 @@ void Unit::RemoveVehicleKit()
         return;
 
     m_vehicleKit->Uninstall();
-    delete m_vehicleKit;
+	delete m_vehicleKit;
 
     m_vehicleKit = NULL;
 
@@ -17478,11 +17480,10 @@ bool Unit::SetSwim(bool enable)
     if (enable == HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
         return false;
 
-    if (enable)
-        AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-    else
+	if (enable) 
+        AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);	
+	else 
         RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-
     return true;
 }
 
