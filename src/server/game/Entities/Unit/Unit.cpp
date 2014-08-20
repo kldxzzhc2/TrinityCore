@@ -69,7 +69,7 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     2.5f,                  // MOVE_WALK
     7.0f,                  // MOVE_RUN
     4.5f,                  // MOVE_RUN_BACK
-    3.0f,      			   // MOVE_SWIM  zhang hong chao old value is 4.722222f,
+    3.0f,      		   // MOVE_SWIM  zhang hong chao old value is 4.722222f,
     2.5f,                  // MOVE_SWIM_BACK
     3.141594f,             // MOVE_TURN_RATE
     7.0f,                  // MOVE_FLIGHT
@@ -15509,15 +15509,15 @@ void Unit::SetControlled(bool apply, UnitState state)
                 }
                 break;
             case UNIT_STATE_FLEEING:
-				// zhang hong chao remove UNIT_STATE_STUNNED  check
+		// zhang hong chao remove UNIT_STATE_STUNNED  check
                 if (!HasUnitState(UNIT_STATE_CONFUSED))
                 {
                     ClearUnitState(UNIT_STATE_MELEE_ATTACKING);
                     SendMeleeAttackStop();
-					CastStop();
-					if (ToCreature())
-						ToCreature()->SetReactState(REACT_PASSIVE);
-					SetFeared(true);
+		    CastStop();
+		    if (ToCreature())
+			ToCreature()->SetReactState(REACT_PASSIVE);
+		    SetFeared(true);
                 }
                 break;
             default:
