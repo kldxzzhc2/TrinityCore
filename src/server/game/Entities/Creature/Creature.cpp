@@ -449,7 +449,7 @@ void Creature::Update(uint32 diff)
             m_vehicleKit->Reset();
     }
 
-	UpdateMovementFlags();
+    UpdateMovementFlags();
 
     switch (m_deathState)
     {
@@ -692,7 +692,7 @@ void Creature::DoFleeToGetAssistance()
             //SetFeared(true, EnsureVictim()->GetGUID(), 0, sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY));
             /// @todo use 31365
             SetControlled(true, UNIT_STATE_FLEEING);
-		else
+        else
             GetMotionMaster()->MoveSeekAssistance(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ());
     }
 }
@@ -2473,7 +2473,6 @@ bool Creature::SetDisableGravity(bool disable, bool packetOnly/*=false*/)
 
 bool Creature::SetSwim(bool enable)
 {
-	// zhang hong chao
     CreatureTemplate const* cInfo = GetCreatureTemplate();
     if ((cInfo->unit_flags & 32768) == 0) {
 	if (enable)
