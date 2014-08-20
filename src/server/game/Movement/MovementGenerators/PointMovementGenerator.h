@@ -27,7 +27,7 @@ class PointMovementGenerator : public MovementGeneratorMedium< T, PointMovementG
 {
     public:
         PointMovementGenerator(uint32 _id, float _x, float _y, float _z, bool _generatePath, float _speed = 0.0f) : id(_id),
-            i_x(_x), i_y(_y), i_z(_z), speed(_speed), m_generatePath(_generatePath), i_recalculateSpeed(false) { }
+			i_x(_x), i_y(_y), i_z(_z), speed(_speed), m_generatePath(_generatePath), i_recalculateSpeed(false) { }
 
         void DoInitialize(T*);
         void DoFinalize(T*);
@@ -52,11 +52,22 @@ class PointMovementGenerator : public MovementGeneratorMedium< T, PointMovementG
 class AssistanceMovementGenerator : public PointMovementGenerator<Creature>
 {
     public:
-        AssistanceMovementGenerator(float _x, float _y, float _z) :
-            PointMovementGenerator<Creature>(0, _x, _y, _z, true) { }
+		// zhang hong chao
+        AssistanceMovementGenerator(float _x, float _y, float _z, bool _generatePath = true, float _speed = 0.0f) : id(0),
+			i_x(_x), i_y(_y), i_z(_z), speed(_speed), m_generatePath(_generatePath), 
+			i_recalculateSpeed(false), PointMovementGenerator<Creature>(0, _x, _y, _z, true) { }
 
         MovementGeneratorType GetMovementGeneratorType() override { return ASSISTANCE_MOTION_TYPE; }
         void Finalize(Unit*) override;
+		//zhang hong chao
+		bool Update(Unit* unit, uint32 /*diff*/) override;
+		void Initialize(Unit* unit) override;
+	private:
+		uint32 id;
+		float i_x, i_y, i_z;
+		float speed;
+		bool m_generatePath;
+		bool i_recalculateSpeed;
 };
 
 // Does almost nothing - just doesn't allows previous movegen interrupt current effect.
