@@ -2792,14 +2792,14 @@ void Player::SetInWater(bool apply)
     /// @todo exist also swimming mobs, and function must be symmetric to enter/leave water
     m_isInWater = apply;
 
-	// add by zhanghongchao
-	if (apply) {
-		if(IsMounted()) {
-			Dismount();
-			RemoveAurasByType(SPELL_AURA_MOUNTED);
-			RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
-		}
+    // add by zhanghongchao
+    if (apply) {
+	if(IsMounted()) {
+	    Dismount();
+	    RemoveAurasByType(SPELL_AURA_MOUNTED);
+	    RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 	}
+    }
 
     // remove auras that need water/land
     RemoveAurasWithInterruptFlags(apply ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
@@ -16322,13 +16322,13 @@ void Player::AreaExploredOrEventHappens(uint32 questId)
             }
         }
 
-		if (CanCompleteQuest(questId)) {
-			CompleteQuest(questId);
-		} else {
-			//add by zhang hong chao, thanks untaught's help
-			SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
-			SendQuestComplete(questId);
-		}
+	if (CanCompleteQuest(questId)) {
+	    CompleteQuest(questId);
+	} else {
+	    //add by zhang hong chao, thanks untaught's help
+	    SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
+	    SendQuestComplete(questId);
+	}
     }
 }
 
