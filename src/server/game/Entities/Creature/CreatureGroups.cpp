@@ -219,49 +219,45 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z)
         return;
 
     float pathangle = atan2(m_leader->GetPositionY() - y, m_leader->GetPositionX() - x);
-	int i = 1;
-	for (CreatureGroupMemberType::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-	{
-		Creature* member = itr->first;
-		if (member == m_leader || !member->IsAlive() || member->GetVictim())
-			continue;
 
-		if (itr->second->point_1)
-		{
-			if (m_leader->GetCurrentWaypointID() == itr->second->point_1)
-				itr->second->follow_angle = (2 * M_PI) - itr->second->follow_angle;
-			if (m_leader->GetCurrentWaypointID() == itr->second->point_2)
-				itr->second->follow_angle = (2 * M_PI) + itr->second->follow_angle;
-		}
+    for (CreatureGroupMemberType::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    {
+        Creature* member = itr->first;
+        if (member == m_leader || !member->IsAlive() || member->GetVictim())
+            continue;
 
-		float angle = itr->second->follow_angle;
-		float dist = itr->second->follow_dist;
+        if (itr->second->point_1)
+        {    
+            if (m_leader->GetCurrentWaypointID() == itr->second->point_1)
+                itr->second->follow_angle = (2 * M_PI) - itr->second->follow_angle;
+            if (m_leader->GetCurrentWaypointID() == itr->second->point_2)
+                itr->second->follow_angle = (2 * M_PI) + itr->second->follow_angle;
+        }
 
-		float dx = x + std::cos(angle + pathangle) * dist;
-		float dy = y + std::sin(angle + pathangle) * dist;
-		float dz = z;
+        float angle = itr->second->follow_angle;
+        float dist = itr->second->follow_dist;
 
-		Trinity::NormalizeMapCoord(dx);
-		Trinity::NormalizeMapCoord(dy);
+        float dx = x + std::cos(angle + pathangle) * dist;
+        float dy = y + std::sin(angle + pathangle) * dist;
+        float dz = z;
 
-		member->UpdateGroundPositionZ(dx, dy, dz);
+        Trinity::NormalizeMapCoord(dx);
+        Trinity::NormalizeMapCoord(dy);
 
-		if (member->IsWithinDist(m_leader, dist + MAX_DESYNC)) {
-			// zhang hong chao
-			member->SetUnitMovementFlags(m_leader->GetUnitMovementFlags());
-			if (m_leader->GetDefaultMovementType() == RANDOM_MOTION_TYPE &&
-				m_leader->GetMotionMaster()->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE) {
-				member->SetWalk(true);
-			}
-			else {
-				member->SetWalk(m_leader->IsWalking());
-			}
-		}
-		else {
-			member->SetWalk(false);
-		}
-		member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
-		member->SetHomePosition(dx, dy, dz, pathangle);
-		
+        member->UpdateGroundPositionZ(dx, dy, dz);
+
+        if (member->IsWithinDist(m_leader, dist + MAX_DESYNC)) {
+            member->SetUnitMovementFlags(m_leader->GetUnitMovementFlags());
+            if (m_leader->GetDefaultMovementType() == RANDOM_MOTION_TYPE &&
+                m_leader->GetMotionMaster()->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE) {
+                member->SetWalk(true);
+            } else {
+                member->SetWalk(m_leader->IsWalking());
+            }
+        } else {
+            member->SetWalk(false);
+        }
+        member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
+        member->SetHomePosition(dx, dy, dz, pathangle);
     }
 }
