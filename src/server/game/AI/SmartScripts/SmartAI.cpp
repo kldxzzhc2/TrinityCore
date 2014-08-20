@@ -567,9 +567,9 @@ void SmartAI::JustReachedHome()
         if (!UpdateVictim() && me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE && me->GetWaypointPath())
             me->GetMotionMaster()->MovePath(me->GetWaypointPath(), true);
 
-		//zhang hong chao
-		if (!UpdateVictim() && me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE && me->GetDefaultMovementType() == RANDOM_MOTION_TYPE)
-			me->GetMotionMaster()->MoveRandom(me->GetRespawnRadius());
+	//zhang hong chao
+	if (!UpdateVictim() && me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE && me->GetDefaultMovementType() == RANDOM_MOTION_TYPE)
+		me->GetMotionMaster()->MoveRandom(me->GetRespawnRadius());
     }
 
     mJustReset = false;
@@ -751,8 +751,8 @@ bool SmartAI::sOnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effInde
 
 void SmartAI::SetCombatMove(bool on)
 {
-	// zhang hong chao
-	if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == ASSISTANCE_MOTION_TYPE ||
+    // zhang hong chao
+    if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == ASSISTANCE_MOTION_TYPE ||
 		me->GetMotionMaster()->GetCurrentMovementGeneratorType() == TIMED_FLEEING_MOTION_TYPE ||
 		me->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLEEING_MOTION_TYPE)
 		return;
