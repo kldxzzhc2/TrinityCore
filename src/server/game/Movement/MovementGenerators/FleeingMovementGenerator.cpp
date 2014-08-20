@@ -36,10 +36,11 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T* owner)
     if (!owner)
         return;
 
-    if (owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
-        return;
+	owner->AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
 
-    owner->AddUnitState(UNIT_STATE_FLEEING_MOVE);
+	// zhang hong chao
+	if (owner->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
+		return;
 
     float x, y, z;
     _getPoint(owner, x, y, z);
@@ -122,6 +123,7 @@ void FleeingMovementGenerator<T>::DoInitialize(T* owner)
 
     owner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     owner->AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+
     _setTargetLocation(owner);
 }
 
@@ -154,11 +156,32 @@ bool FleeingMovementGenerator<T>::DoUpdate(T* owner, uint32 time_diff)
     if (!owner || !owner->IsAlive())
         return false;
 
-    if (owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
-    {
-        owner->ClearUnitState(UNIT_STATE_FLEEING_MOVE);
-        return true;
-    }
+	//zhang hong chao
+	if (owner->HasUnitState(UNIT_STATE_ROOT))
+	{
+		if (owner->ToCreature()->HasReactState(REACT_PASSIVE)) {
+			owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+			owner->ClearUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+			owner->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+			if (Unit* victim = owner->GetVictim())
+			{
+				if (owner->IsAlive())
+				{
+					owner->AttackStop();
+					owner->ToCreature()->AI()->AttackStart(victim);
+				}
+			}
+		}
+		return true;
+	}
+	if (owner->ToCreature()->HasReactState(REACT_AGGRESSIVE)) {
+		owner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+		owner->AddUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+		owner->AttackStop();
+		owner->CastStop();
+		owner->ToCreature()->SetReactState(REACT_PASSIVE);
+		i_nextCheckTime.Reset(100);
+	}
 
     i_nextCheckTime.Update(time_diff);
     if (i_nextCheckTime.Passed() && owner->movespline->Finalized())
@@ -182,6 +205,7 @@ void TimedFleeingMovementGenerator::Finalize(Unit* owner)
 {
     owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     owner->ClearUnitState(UNIT_STATE_FLEEING|UNIT_STATE_FLEEING_MOVE);
+	owner->ToCreature()->SetReactState(REACT_AGGRESSIVE);
     if (Unit* victim = owner->GetVictim())
     {
         if (owner->IsAlive())
@@ -196,12 +220,6 @@ bool TimedFleeingMovementGenerator::Update(Unit* owner, uint32 time_diff)
 {
     if (!owner->IsAlive())
         return false;
-
-    if (owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
-    {
-        owner->ClearUnitState(UNIT_STATE_FLEEING_MOVE);
-        return true;
-    }
 
     i_totalFleeTime.Update(time_diff);
     if (i_totalFleeTime.Passed())
