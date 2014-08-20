@@ -33,7 +33,8 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
     if (!i_target.isValid() || !i_target->IsInWorld())
         return;
 
-    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
+	// zhang hong chao
+    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE | UNIT_STATE_CASTING))
         return;
 
     if (owner->GetTypeId() == TYPEID_UNIT && !i_target->isInAccessiblePlaceFor(owner->ToCreature()))
@@ -108,7 +109,23 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
 
     Movement::MoveSplineInit init(owner);
     init.MovebyPath(i_path->GetPath());
-    init.SetWalk(((D*)this)->EnableWalking());
+	// add by zhang hong chao
+	Unit * u = owner->GetCharmerOrOwner();
+	if (u && i_target->GetGUID() == u->GetGUID() && u->GetTypeId() == TYPEID_UNIT) {
+		if (i_target->ToCreature()->GetMotionMaster()->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE) {
+			if (owner->IsWithinDist(u, 20.0f)) {
+				init.SetWalk(true);
+			} else {
+				init.SetWalk(false);
+			}
+		} else if (i_target->ToCreature()->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE) {
+			init.SetWalk(false);
+		} 
+	}
+	else {
+		init.SetWalk(((D*)this)->EnableWalking());
+	}
+
     // Using the same condition for facing target as the one that is used for SetInFront on movement end
     // - applies to ChaseMovementGenerator mostly
     if (i_angle == 0.f)
@@ -126,17 +143,14 @@ bool TargetedMovementGeneratorMedium<T, D>::DoUpdate(T* owner, uint32 time_diff)
     if (!owner || !owner->IsAlive())
         return false;
 
-    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
-    {
-        D::_clearUnitStateMove(owner);
-        return true;
-    }
-
     // prevent movement while casting spells with cast time or channel time
-    if (owner->HasUnitState(UNIT_STATE_CASTING))
-    {
-        if (!owner->IsStopped())
-            owner->StopMoving();
+	// zhang hong chao
+	if (owner->HasUnitState(UNIT_STATE_CASTING | UNIT_STATE_NOT_MOVE))
+	{
+		if (!owner->IsStopped()) {
+			D::_clearUnitStateMove(owner);
+			owner->StopMoving();
+		}
         return true;
     }
 
@@ -239,7 +253,7 @@ void ChaseMovementGenerator<Creature>::MovementInform(Creature* unit)
 template<>
 bool FollowMovementGenerator<Creature>::EnableWalking() const
 {
-    return i_target.isValid() && i_target->IsWalking();
+	return i_target.isValid() && i_target->IsWalking();
 }
 
 template<>
